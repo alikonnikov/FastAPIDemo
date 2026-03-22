@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
 from typing import List, Optional, Any, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 
 class PyObjectId(ObjectId):
@@ -58,7 +58,7 @@ class Task(BaseModel):
     status: Literal["processing", "ready", "error"] = "ready"
     tags: List[str] = []
     user_id: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Config:
         populate_by_name = True

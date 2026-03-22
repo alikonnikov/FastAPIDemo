@@ -37,10 +37,4 @@ async def process_ai_suggestion(task_id: str, text: str):
 
 @celery_app.task(name="app.worker.tasks.generate_task_suggestion")
 def generate_task_suggestion(task_id: str, text: str):
-    loop = asyncio.get_event_loop()
-    if loop.is_running():
-        # In some environments, we might need a separate loop
-        new_loop = asyncio.new_event_loop()
-        new_loop.run_until_complete(process_ai_suggestion(task_id, text))
-    else:
-        loop.run_until_complete(process_ai_suggestion(task_id, text))
+    asyncio.run(process_ai_suggestion(task_id, text))

@@ -7,7 +7,7 @@ from app.db.mongo import get_database
 from app.core.config import settings
 from app.models.user import TokenData
 from jose import JWTError, jwt
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 
 from app.worker.tasks import generate_task_suggestion
@@ -49,7 +49,7 @@ async def suggest_task_async(input: TaskSuggestionInput, current_user: dict = De
         "title": "Processing...",
         "description": input.text,
         "status": "processing",
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "user_id": str(current_user["_id"])
     }
     result = await db.tasks.insert_one(new_task)
@@ -63,7 +63,7 @@ async def suggest_task_async(input: TaskSuggestionInput, current_user: dict = De
 @router.post("/tasks", response_model=Task)
 async def create_task(task_data: TaskSuggestion = Body(...), current_user: dict = Depends(get_current_user)):
     db = get_database()
-    new_task = task_data.dict()
+    new_task = task_data.model_dump()
     new_task["status"] = "ready"
     new_task["user_id"] = str(current_user["_id"])
     
@@ -126,7 +126,7 @@ async def update_task(
     if task.get("user_id") != str(current_user["_id"]):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
-    update_data = {k: v for k, v in task_update.dict().items() if v is not None}
+    update_data = task_update.model_dump(exclude_unset=True)
     
     if update_data:
         await db.tasks.update_one(

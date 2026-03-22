@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.models.user import UserCreate, UserResponse, Token, UserInDB
 from app.db.mongo import get_database
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -18,13 +18,13 @@ async def register(user_in: UserCreate):
             detail="User with this email or username already exists"
         )
     
-    user_dict = user_in.dict()
+    user_dict = user_in.model_dump()
     hashed_password = get_password_hash(user_dict.pop("password"))
     
     new_user = {
         **user_dict,
         "hashed_password": hashed_password,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc)
     }
     
     result = await db.users.insert_one(new_user)

@@ -3,6 +3,14 @@ from openai import AsyncOpenAI
 from app.core.config import settings
 from app.models.task import TaskSuggestion
 
+_client: AsyncOpenAI = None
+
+def get_openai_client() -> AsyncOpenAI:
+    global _client
+    if _client is None:
+        _client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+    return _client
+
 async def get_ai_task_suggestion(text: str) -> TaskSuggestion:
     # If key is default or missing, use mock
     if not settings.OPENAI_API_KEY or settings.OPENAI_API_KEY == "your_key":
@@ -14,7 +22,7 @@ async def get_ai_task_suggestion(text: str) -> TaskSuggestion:
         )
 
     try:
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        client = get_openai_client()
         
         system_prompt = (
             "You are an expert project manager. Convert messy task descriptions into professional, structured tasks. "
