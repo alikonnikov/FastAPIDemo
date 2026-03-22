@@ -1,0 +1,52 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: task-tracker-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:alpine
+    container_name: task-tracker-redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: task-tracker-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  api:
+    build: .
+    image: task-tracker-backend:latest
+    container_name: task-tracker-api
+    env_file: .env
+    ports:
+      - "8800:8000"
+    volumes:
+      - .:/code
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build: .
+    image: task-tracker-backend:latest
+    container_name: task-tracker-worker
+    env_file: .env
+    volumes:
+      - .:/code
+    depends_on:
+      - rabbitmq
+      - redis
+      - mongodb
+    command: celery -A app.worker.celery_app worker --loglevel=info
+
+volumes:
+  mongo_data:
