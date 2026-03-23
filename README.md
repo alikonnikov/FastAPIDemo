@@ -2,6 +2,8 @@
 
 Small internal tool for converting messy task descriptions into structured tasks using AI.
 
+**Live Demo**: [https://demo.my-daily-quest.com/](https://demo.my-daily-quest.com/)
+
 ## Quick Start
 
 ### 1. Clone and Prepare
@@ -18,7 +20,7 @@ docker-compose up --build
 ```
 
 ### 3. Verify
-- **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **API Docs**: [http://localhost:8800/docs](http://localhost:8800/docs)
 - **RabbitMQ Management**: [http://localhost:15672](http://localhost:15672) (guest/guest)
 - **Redis**: `localhost:6379`
 - **MongoDB**: `localhost:27017`
